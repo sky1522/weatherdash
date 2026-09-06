@@ -1,0 +1,10 @@
+name = "typhoon-map-api"
+main = "worker/index.ts"
+compatibility_date = "2025-12-01"
+
+# KMA_AUTH_KEY 는 시크릿 바인딩이다. 이 파일에 값을 적지 않는다.
+#   로컬:  .dev.vars  (gitignore 대상, .dev.vars.example 참고)
+#   배포:  pnpm wrangler secret put KMA_AUTH_KEY
+
+[dev]
+port = 8787

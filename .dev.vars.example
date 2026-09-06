@@ -1,0 +1,7 @@
+# 기상청 API 허브 인증키.
+# 이 파일을 .dev.vars 로 복사한 뒤 값을 채운다. .dev.vars 는 gitignore 대상이다.
+#
+#   cp .dev.vars.example .dev.vars
+#
+# 발급: https://apihub.kma.go.kr  (마이페이지 > 인증키)
+KMA_AUTH_KEY=
