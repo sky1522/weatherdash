@@ -6,12 +6,10 @@ import { basemapStyle } from './basemap-style';
 export const NORTHWEST_PACIFIC = {
   center: [138, 22] as [number, number],
   zoom: 3,
-  /** 🚨 날짜변경선을 넘는 경로를 다루므로 동쪽 경계를 180도 너머까지 열어 둔다. */
-  maxBounds: [
-    [90, -5],
-    [200, 55],
-  ] as [[number, number], [number, number]],
 };
+// 🚨 maxBounds 는 두지 않는다. 날짜변경선을 넘는 경로를 담으려면 동쪽 경계가 180도를
+//    넘어야 하는데, 그 값이 카메라 제약과 어떻게 상호작용하는지 확인되지 않았다.
+//    경로 렌더가 붙는 P2 에서 실제 경로로 확인한 뒤 다시 판단한다.
 
 let protocolRegistered = false;
 
@@ -31,7 +29,6 @@ export function createMap(container: HTMLElement, pmtilesUrl: string): maplibreg
     style: basemapStyle(pmtilesUrl),
     center: NORTHWEST_PACIFIC.center,
     zoom: NORTHWEST_PACIFIC.zoom,
-    maxBounds: NORTHWEST_PACIFIC.maxBounds,
     attributionControl: { compact: true },
   });
 

@@ -20,27 +20,38 @@ export function basemapStyle(pmtilesUrl: string): StyleSpecification {
       },
     },
     layers: [
-      { id: 'background', type: 'background', paint: { 'background-color': '#070b10' } },
+      // 바다. 배경색과 같은 값을 쓰면 화면 전체가 한 덩어리로 보인다.
+      // 초기 뷰는 대부분이 바다라 여기서 대비가 무너지면 지도가 안 보인다.
+      { id: 'background', type: 'background', paint: { 'background-color': '#0a1119' } },
       {
         id: 'earth',
         type: 'fill',
         source: 'basemap',
         'source-layer': 'earth',
-        paint: { 'fill-color': '#0d141c' },
+        paint: { 'fill-color': '#243444' },
       },
       {
         id: 'landuse',
         type: 'fill',
         source: 'basemap',
         'source-layer': 'landuse',
-        paint: { 'fill-color': '#111a23' },
+        minzoom: 4,
+        paint: { 'fill-color': '#2b3d4e' },
       },
       {
         id: 'water',
         type: 'fill',
         source: 'basemap',
         'source-layer': 'water',
-        paint: { 'fill-color': '#070b10' },
+        paint: { 'fill-color': '#0a1119' },
+      },
+      // 해안선. 면 대비만으로는 저줌에서 윤곽이 흐려진다.
+      {
+        id: 'coastline',
+        type: 'line',
+        source: 'basemap',
+        'source-layer': 'earth',
+        paint: { 'line-color': '#3d5670', 'line-width': 0.8 },
       },
       {
         id: 'roads',
@@ -48,14 +59,14 @@ export function basemapStyle(pmtilesUrl: string): StyleSpecification {
         source: 'basemap',
         'source-layer': 'roads',
         minzoom: 6,
-        paint: { 'line-color': '#1b2a38', 'line-width': 0.6 },
+        paint: { 'line-color': '#33455a', 'line-width': 0.6 },
       },
       {
         id: 'boundaries',
         type: 'line',
         source: 'basemap',
         'source-layer': 'boundaries',
-        paint: { 'line-color': '#243747', 'line-width': 0.8, 'line-dasharray': [2, 2] },
+        paint: { 'line-color': '#5a7590', 'line-width': 0.8, 'line-dasharray': [2, 2] },
       },
       {
         id: 'place-labels',
@@ -68,9 +79,9 @@ export function basemapStyle(pmtilesUrl: string): StyleSpecification {
           'text-size': 11,
         },
         paint: {
-          'text-color': '#5f7387',
-          'text-halo-color': '#070b10',
-          'text-halo-width': 1.2,
+          'text-color': '#93a8bc',
+          'text-halo-color': '#0a1119',
+          'text-halo-width': 1.4,
         },
       },
     ],

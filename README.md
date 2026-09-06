@@ -43,18 +43,30 @@ pnpm dev:worker                  # 프록시 :8787  ← 먼저 띄운다
 pnpm dev                         # 프론트 :5173
 ```
 
-두 프로세스를 **함께** 띄워야 한다. Worker가 태풍 API뿐 아니라 베이스맵 타일도 중계하기
-때문에, Worker 없이 프론트만 띄우면 지도가 "베이스맵 로드 실패"로 뜬다.
-프론트의 `/api/*` 요청은 Vite dev 프록시가 `:8787`로 넘긴다.
+프론트의 `/api/*` 요청은 Vite dev 프록시가 `:8787`로 넘긴다. 베이스맵은 저장소에 함께
+들어 있으므로, 지도만 볼 거라면 `pnpm dev` 하나로도 뜬다. 태풍 데이터를 부르는 시점부터
+Worker가 필요하다.
 
 ### 베이스맵 타일
 
-기본 소스는 Protomaps 공개 데모 PMTiles다. 이 버킷은 `Access-Control-Allow-Origin`을
-주지 않아 브라우저가 직접 읽을 수 없다. Worker의 `/api/basemap`이 Range 요청을 중계하면서
-CORS 헤더를 붙인다.
+`public/basemap-nwpacific.pmtiles` (5.8 MB)를 저장소에 함께 둔다.
+북서태평양 영역(경도 90~180, 위도 -5~55)을 줌 0~6까지 잘라낸 것이다.
+같은 출처에서 서빙되므로 CORS 문제가 없고, 로컬과 배포가 같은 방식으로 동작한다.
 
-운영에서는 자체 호스팅 PMTiles로 바꾼다. `VITE_PMTILES_URL`에 절대 URL을 넣으면 중계를
-거치지 않고 직접 읽는다. 그 경우 해당 호스트가 CORS와 Range를 지원해야 한다.
+원본은 Protomaps 공개 데모 PMTiles다. 그 버킷은 `Access-Control-Allow-Origin`을 주지
+않아 브라우저가 직접 읽을 수 없다. 추출은 아래로 다시 만들 수 있다.
+
+```bash
+pmtiles extract https://demo-bucket.protomaps.com/v4.pmtiles public/basemap-nwpacific.pmtiles --bbox=90,-5,180,55 --maxzoom=6
+```
+
+더 넓은 영역이나 높은 줌이 필요하면 `VITE_PMTILES_URL`로 다른 소스를 지정한다.
+Worker의 `/api/basemap`은 원본 행성 타일(137 GB)에 Range 요청을 중계하는 우회로다.
+줌 15까지 볼 수 있지만 외부 데모 버킷에 의존하므로 개발용으로만 쓴다.
+
+```bash
+VITE_PMTILES_URL=/api/basemap pnpm dev
+```
 
 ## 문서
 

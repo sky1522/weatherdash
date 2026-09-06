@@ -37,6 +37,7 @@ body {
   font-family: var(--mono);
   font-size: 12px;
   line-height: 1.5;
+  white-space: pre-line;
 }
 
 .status[data-state='error'] {
