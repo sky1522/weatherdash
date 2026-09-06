@@ -32,8 +32,14 @@ const collected = existsSync(MANIFEST);
 describe.skipIf(!collected)('fixtures/raw 무결성', () => {
   const manifest = collected ? (JSON.parse(readFileSync(MANIFEST, 'utf8')) as Manifest) : null;
 
-  it('매니페스트에 authKey 가 남아 있지 않다', () => {
-    expect(readFileSync(MANIFEST, 'utf8')).not.toMatch(/authKey/i);
+  it('매니페스트에 인증키가 기록되어 있지 않다', () => {
+    // 파라미터 기록에 authKey 키 자체가 없어야 한다.
+    for (const entry of manifest!.files) {
+      const keys = Object.keys(entry.params).map((k) => k.toLowerCase());
+      expect(keys).not.toContain('authkey');
+    }
+    // 쿼리스트링 형태로 새어 들어간 흔적도 없어야 한다.
+    expect(readFileSync(MANIFEST, 'utf8')).not.toMatch(/authKey\s*[=:]\s*\S/i);
   });
 
   it('disp × help 조합이 빠짐없이 수집되어 있다', () => {

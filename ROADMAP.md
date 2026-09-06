@@ -9,15 +9,18 @@
 
 목표: 코드를 쓰기 전에 실제 응답이 어떻게 생겼는지 확정한다.
 
-- [ ] Vite + TypeScript + MapLibre 기본 셋업, PMTiles 베이스맵 표시
-- [ ] Cloudflare Worker 프록시 골격 (`/api/typhoon/*`), `KMA_AUTH_KEY` 시크릿 바인딩
-- [ ] 3개 엔드포인트 원문 응답을 `fixtures/raw/` 에 저장
-      (`typ_lst`, `typ_data`, `typ_now` × `disp=0/1` × `help=0/1/2`)
-- [ ] 응답 인코딩 확정 (UTF-8 / EUC-KR) 🔶 — 태풍 한글명이 깨지는지 확인
-- [ ] 결측값 표기 확정 🔶 — 빈칸인지 `-9`, `-999`, `-`인지
-- [ ] 진행 중 태풍이 없을 때의 응답 형태 확정 🔶
+- [x] Vite + TypeScript + MapLibre 기본 셋업, PMTiles 베이스맵 표시
+- [x] Cloudflare Worker 프록시 골격 (`/api/typhoon/*`), `KMA_AUTH_KEY` 시크릿 바인딩
+- [x] 3개 엔드포인트 원문 응답을 `fixtures/raw/` 에 저장
+      (`typ_lst`, `typ_data`, `typ_now` × `disp=0/1` × `help=0/1/2`, 부재 응답 2건 포함 총 20건)
+- [x] 응답 인코딩 확정 ✅ **EUC-KR** — UTF-8 디코딩 실패, 헤더도 `charset=EUC-KR`
+- [x] 결측값 표기 확정 ✅ 수치는 `-999`, 방위는 `-`. 빈칸·`-9`는 없음
+- [x] 진행 중 태풍이 없을 때의 응답 형태 확정 ✅ HTTP 200 + 데이터행 0개 (오류 아님)
+- [x] `ER25R` 필드명 ✅ 오타 아님. 단 응답 내 컬럼 헤더는 `ER25`로 불일치
+- [x] `RAD15`/`RAD25` 대응 ✅ 각각 강풍(15 m/s)/폭풍(25 m/s) 반경. 레퍼런스와 일치
+- [x] 발표 시각대 ✅ 4·10·16·22시는 **KST**. 분석시각은 UTC 00/06/12/18
 
-**DoD**: 위 🔶 세 항목이 ✅로 바뀌고 픽스처가 저장소에 커밋됨.
+**DoD 충족.** 근거는 `PROGRESS.md` 「해소된 질문」 절, 원문은 `fixtures/raw/`.
 
 ---
 

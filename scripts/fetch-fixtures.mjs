@@ -73,10 +73,11 @@ async function get(endpointPath, params, authKey) {
  * 여기서 쓰는 정규식은 seq 발견용이지 파서가 아니다. 파서는 P1 범위다.
  */
 function discoverSeq(bytes) {
-  const text = bytes.toString('utf8');
-  const matches = [...text.matchAll(/^\s*\d{4}\s*,\s*\d+\s*,\s*(\d+)\s*,/gm)].map((m) =>
-    Number(m[1]),
-  );
+  // 응답은 EUC-KR 이지만 여기서 보는 앞쪽 숫자 필드는 ASCII 라 latin1 로 읽어도 안전하다.
+  // 한글이 들어가는 LOC 필드는 건드리지 않는다.
+  const text = bytes.toString('latin1');
+  // 데이터행 형식: FT,YY,TYP,SEQ,TMD,... (FT 는 0=분석 / 1=예측)
+  const matches = [...text.matchAll(/^[01],(\d{4}),(\d+),(\d+),/gm)].map((m) => Number(m[3]));
   if (matches.length === 0) return null;
   return Math.max(...matches);
 }

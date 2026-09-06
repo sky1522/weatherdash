@@ -1,0 +1,302 @@
+{
+  "collectedAt": "2026-09-06T03:08:10.132Z",
+  "target": {
+    "year": "2026",
+    "typ": "24",
+    "seq": 21,
+    "name": "KROVANH / 크로반"
+  },
+  "note": "authKey 는 매니페스트에 기록하지 않는다. 응답 본문은 바이트 그대로 저장했다.",
+  "files": [
+    {
+      "file": "typ_lst_disp0_help0.txt",
+      "endpoint": "/api/typ01/url/typ_lst.php",
+      "params": {
+        "YY": "2026",
+        "disp": "0",
+        "help": "0"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 4745,
+      "sha256": "08359209a25df3810a80ff516cad080e9b8a7ca1ac614e1fb33608b5182f4f28"
+    },
+    {
+      "file": "typ_lst_disp0_help1.txt",
+      "endpoint": "/api/typ01/url/typ_lst.php",
+      "params": {
+        "YY": "2026",
+        "disp": "0",
+        "help": "1"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 5452,
+      "sha256": "1044c2af18be540a3ccaeb37886ae524b6f406af22db54d6eadd88d9b06a099e"
+    },
+    {
+      "file": "typ_lst_disp0_help2.txt",
+      "endpoint": "/api/typ01/url/typ_lst.php",
+      "params": {
+        "YY": "2026",
+        "disp": "0",
+        "help": "2"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 4536,
+      "sha256": "c19ffcb6f98205c5c7aa129dafa5008a7b2d69a038358f5f96f036eab8c84bf9"
+    },
+    {
+      "file": "typ_lst_disp1_help0.txt",
+      "endpoint": "/api/typ01/url/typ_lst.php",
+      "params": {
+        "YY": "2026",
+        "disp": "1",
+        "help": "0"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 3216,
+      "sha256": "18b5bab14fa5b95edca058d82cafa46a2d92db1210825d0736f2fd993392bd8c"
+    },
+    {
+      "file": "typ_lst_disp1_help1.txt",
+      "endpoint": "/api/typ01/url/typ_lst.php",
+      "params": {
+        "YY": "2026",
+        "disp": "1",
+        "help": "1"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 3923,
+      "sha256": "b23d4e684916077fd012677f73fbd7a0751be37d82cd1b42a1fb2ff4074668dc"
+    },
+    {
+      "file": "typ_lst_disp1_help2.txt",
+      "endpoint": "/api/typ01/url/typ_lst.php",
+      "params": {
+        "YY": "2026",
+        "disp": "1",
+        "help": "2"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 3007,
+      "sha256": "f6832069518c5a689814b45df814466bc03c43e2ee702ef6ae9333321d8e440e"
+    },
+    {
+      "file": "typ_data_disp0_help0.txt",
+      "endpoint": "/api/typ01/url/typ_data.php",
+      "params": {
+        "YY": "2026",
+        "typ": "24",
+        "seq": "21",
+        "mode": "1",
+        "disp": "0",
+        "help": "0"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 5694,
+      "sha256": "5de51bc321c965500109cffec3d833f7eb5065d165e80ba574b5a0c4794dc085"
+    },
+    {
+      "file": "typ_data_disp0_help1.txt",
+      "endpoint": "/api/typ01/url/typ_data.php",
+      "params": {
+        "YY": "2026",
+        "typ": "24",
+        "seq": "21",
+        "mode": "1",
+        "disp": "0",
+        "help": "1"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 6808,
+      "sha256": "b69a0e1b5c62073a41d4535cf5a0c3c99ab83206bd6393e9cded26042e096792"
+    },
+    {
+      "file": "typ_data_disp0_help2.txt",
+      "endpoint": "/api/typ01/url/typ_data.php",
+      "params": {
+        "YY": "2026",
+        "typ": "24",
+        "seq": "21",
+        "mode": "1",
+        "disp": "0",
+        "help": "2"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 5448,
+      "sha256": "baa0713bc4e41320c99cf2d86d7fb2ecca0b79ee813a75fe3834255469a71fc7"
+    },
+    {
+      "file": "typ_data_disp1_help0.txt",
+      "endpoint": "/api/typ01/url/typ_data.php",
+      "params": {
+        "YY": "2026",
+        "typ": "24",
+        "seq": "21",
+        "mode": "1",
+        "disp": "1",
+        "help": "0"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 3438,
+      "sha256": "909e08be90569e91aab4c740bea6c5fd6c7819d150766904502fe7e7befe23e9"
+    },
+    {
+      "file": "typ_data_disp1_help1.txt",
+      "endpoint": "/api/typ01/url/typ_data.php",
+      "params": {
+        "YY": "2026",
+        "typ": "24",
+        "seq": "21",
+        "mode": "1",
+        "disp": "1",
+        "help": "1"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 4552,
+      "sha256": "1286ee41d25c05186a281e958d2576c756c8f7a7f4ce62bc719612d439bf61c8"
+    },
+    {
+      "file": "typ_data_disp1_help2.txt",
+      "endpoint": "/api/typ01/url/typ_data.php",
+      "params": {
+        "YY": "2026",
+        "typ": "24",
+        "seq": "21",
+        "mode": "1",
+        "disp": "1",
+        "help": "2"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 3192,
+      "sha256": "91ec5cf5a23d1eecf703d40f254b71dd35fd924cd261680ebe1a5b86da01f851"
+    },
+    {
+      "file": "typ_now_disp0_help0.txt",
+      "endpoint": "/api/typ01/url/typ_now.php",
+      "params": {
+        "tm": "202609060300",
+        "mode": "1",
+        "disp": "0",
+        "help": "0"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 5694,
+      "sha256": "d26ca4691a531943e79c8db9dc5fc25c3c8ad0899722dd46c1df8c6f709f0eeb"
+    },
+    {
+      "file": "typ_now_disp0_help1.txt",
+      "endpoint": "/api/typ01/url/typ_now.php",
+      "params": {
+        "tm": "202609060300",
+        "mode": "1",
+        "disp": "0",
+        "help": "1"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 6788,
+      "sha256": "d7d67e7db4869c3d464589171f7ef6babefed442d3d38c49ac172852cf93b07a"
+    },
+    {
+      "file": "typ_now_disp0_help2.txt",
+      "endpoint": "/api/typ01/url/typ_now.php",
+      "params": {
+        "tm": "202609060300",
+        "mode": "1",
+        "disp": "0",
+        "help": "2"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 5448,
+      "sha256": "f9675fbd60cedcb5984dd79859e4da11f121bf4bf67d0e1df2381266796accf1"
+    },
+    {
+      "file": "typ_now_disp1_help0.txt",
+      "endpoint": "/api/typ01/url/typ_now.php",
+      "params": {
+        "tm": "202609060300",
+        "mode": "1",
+        "disp": "1",
+        "help": "0"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 3435,
+      "sha256": "9534eb7353b3ab662f442f14da827ec072e1f681e498c01728effe3fa6235dd5"
+    },
+    {
+      "file": "typ_now_disp1_help1.txt",
+      "endpoint": "/api/typ01/url/typ_now.php",
+      "params": {
+        "tm": "202609060300",
+        "mode": "1",
+        "disp": "1",
+        "help": "1"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 4529,
+      "sha256": "cd6502774340438df3b462c79fcb8fd00f00cfb054485594ff523dafedd5d853"
+    },
+    {
+      "file": "typ_now_disp1_help2.txt",
+      "endpoint": "/api/typ01/url/typ_now.php",
+      "params": {
+        "tm": "202609060300",
+        "mode": "1",
+        "disp": "1",
+        "help": "2"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 3189,
+      "sha256": "83e870fcfae39a790d9a6d810cd901392bb6f3d43ba22ca7ff578574aca4b9b9"
+    },
+    {
+      "file": "typ_data_absent_disp1_help2.txt",
+      "endpoint": "/api/typ01/url/typ_data.php",
+      "params": {
+        "YY": "2026",
+        "typ": "99",
+        "seq": "1",
+        "mode": "1",
+        "disp": "1",
+        "help": "2"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "note": "존재하지 않는 태풍번호(99). 부재 응답 형태 판정용."
+    },
+    {
+      "file": "typ_now_absent_disp1_help2.txt",
+      "endpoint": "/api/typ01/url/typ_now.php",
+      "params": {
+        "tm": "190001010000",
+        "mode": "1",
+        "disp": "1",
+        "help": "2"
+      },
+      "httpStatus": 200,
+      "contentType": "text/plain;charset=EUC-KR",
+      "bytes": 9,
+      "sha256": "dbd975c414310b748eabae6d2996c01ea8d496c5bcfd3560a537e1daf867624d",
+      "note": "태풍이 존재할 수 없는 과거 시각. 부재 응답 형태 판정용."
+    }
+  ]
+}
