@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // GitHub Pages 는 /weatherdash/ 하위에 서빙된다. CI 에서 VITE_BASE 로 주입한다.
+  base: process.env['VITE_BASE'] ?? '/',
   server: {
     port: 5173,
     proxy: {

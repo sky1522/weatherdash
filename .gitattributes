@@ -1,0 +1,12 @@
+# 기본은 git 자동 판별에 맡긴다.
+* text=auto
+
+# 🚨 픽스처는 API 원문 바이트 그대로여야 한다.
+# core.autocrlf=true 환경에서 .txt 를 텍스트로 취급하면 커밋 시 CRLF→LF,
+# 체크아웃 시 LF→CRLF 변환이 일어나 wire 바이트와 달라진다.
+# 인코딩 판정(UTF-8/EUC-KR)과 sha256 무결성 검사가 여기에 달려 있으므로
+# 변환을 전면 금지한다.
+fixtures/raw/** -text -diff
+
+# 레퍼런스 캡처
+*.png binary
