@@ -39,9 +39,22 @@
 ```bash
 pnpm install
 cp .dev.vars.example .dev.vars   # KMA_AUTH_KEY 입력
-pnpm dev:worker                  # 프록시 :8787
+pnpm dev:worker                  # 프록시 :8787  ← 먼저 띄운다
 pnpm dev                         # 프론트 :5173
 ```
+
+두 프로세스를 **함께** 띄워야 한다. Worker가 태풍 API뿐 아니라 베이스맵 타일도 중계하기
+때문에, Worker 없이 프론트만 띄우면 지도가 "베이스맵 로드 실패"로 뜬다.
+프론트의 `/api/*` 요청은 Vite dev 프록시가 `:8787`로 넘긴다.
+
+### 베이스맵 타일
+
+기본 소스는 Protomaps 공개 데모 PMTiles다. 이 버킷은 `Access-Control-Allow-Origin`을
+주지 않아 브라우저가 직접 읽을 수 없다. Worker의 `/api/basemap`이 Range 요청을 중계하면서
+CORS 헤더를 붙인다.
+
+운영에서는 자체 호스팅 PMTiles로 바꾼다. `VITE_PMTILES_URL`에 절대 URL을 넣으면 중계를
+거치지 않고 직접 읽는다. 그 경우 해당 호스트가 CORS와 Range를 지원해야 한다.
 
 ## 문서
 

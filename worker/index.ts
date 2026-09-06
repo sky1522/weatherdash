@@ -12,6 +12,16 @@ import { redact } from './secret';
 
 const UPSTREAM_ORIGIN = 'https://apihub.kma.go.kr';
 
+/**
+ * PMTiles 베이스맵 중계 경로.
+ *
+ * Protomaps 데모 버킷은 Access-Control-Allow-Origin 을 주지 않아 브라우저가 직접
+ * 읽을 수 없다. 여기서 Range 요청을 그대로 넘기고 CORS 헤더를 붙여 돌려준다.
+ * 인증키와는 무관한 경로다. authKey 를 주입하지 않는다.
+ */
+const BASEMAP_ROUTE = '/api/basemap';
+const DEFAULT_PMTILES_UPSTREAM = 'https://demo-bucket.protomaps.com/v4.pmtiles';
+
 /** 라우트 → 업스트림 경로. 이 표에 없는 경로는 프록시하지 않는다. */
 const ROUTES = {
   '/api/typhoon/list': '/api/typ01/url/typ_lst.php',
@@ -34,6 +44,8 @@ const ALLOWED_PARAMS: Record<Route, readonly string[]> = {
 
 export interface Env {
   KMA_AUTH_KEY: string;
+  /** 베이스맵 PMTiles 원본 URL. 미설정 시 Protomaps 공개 데모를 쓴다. */
+  PMTILES_UPSTREAM?: string;
 }
 
 export default {
@@ -42,6 +54,10 @@ export default {
 
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return errorResponse(405, 'method_not_allowed', 'GET만 지원한다.');
+    }
+
+    if (url.pathname === BASEMAP_ROUTE) {
+      return proxyBasemap(request, env.PMTILES_UPSTREAM ?? DEFAULT_PMTILES_UPSTREAM);
     }
 
     const route = url.pathname as Route;
@@ -86,6 +102,37 @@ export default {
     return new Response(response.body, { status: response.status, headers });
   },
 };
+
+/**
+ * PMTiles 원본으로 Range 요청을 중계한다.
+ * 파일 하나가 100 GB 단위라 전체를 읽지 않는다. 브라우저가 요구한 구간만 넘어간다.
+ */
+async function proxyBasemap(request: Request, upstream: string): Promise<Response> {
+  const forwarded = new Headers({ accept: '*/*' });
+  const range = request.headers.get('range');
+  if (range) forwarded.set('range', range);
+
+  let response: Response;
+  try {
+    response = await fetch(upstream, { method: request.method, headers: forwarded });
+  } catch (cause) {
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    return errorResponse(502, 'basemap_unreachable', redact(detail));
+  }
+
+  const headers = new Headers();
+  // Range 응답 조립에 필요한 헤더만 보존한다.
+  for (const name of ['content-type', 'content-length', 'content-range', 'etag', 'accept-ranges']) {
+    const value = response.headers.get(name);
+    if (value) headers.set(name, value);
+  }
+  headers.set('access-control-allow-origin', '*');
+  headers.set('access-control-expose-headers', 'content-range, content-length, etag, accept-ranges');
+  // 정적 타일이다. 캐시해도 된다.
+  headers.set('cache-control', 'public, max-age=86400');
+
+  return new Response(response.body, { status: response.status, headers });
+}
 
 function errorResponse(status: number, code: string, message: string): Response {
   // 여기 들어오는 message는 호출부에서 이미 redact된 값이지만, 이중으로 한 번 더 거른다.

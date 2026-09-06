@@ -172,7 +172,9 @@ Vite 6 + TypeScript strict + MapLibre GL JS 5 + pmtiles 4.
 열어 두어 날짜변경선을 넘는 경로가 P2에서 잘리지 않게 했다.
 레이어 id `place-labels`는 P2에서 태풍 면 레이어를 `beforeId`로 끼울 기준점이다.
 
-베이스맵 URL은 `VITE_PMTILES_URL`로 교체 가능하고 기본값은 Protomaps 공개 데모 타일이다.
+베이스맵 URL은 `VITE_PMTILES_URL`로 교체 가능하다. 기본값은 Worker의 타일 중계 경로
+`/api/basemap`이다. 원본은 Protomaps 공개 데모 PMTiles이고, 그 버킷이 CORS 헤더를
+주지 않아 직접 읽을 수 없어 중계를 거친다.
 
 ### Worker 프록시
 
@@ -271,8 +273,32 @@ remote CI  ✅
 
 ## 짚어둘 것
 
-**PMTiles 베이스맵이 Protomaps 공개 데모 타일이다.** 운영 트래픽을 얹으면 안 된다.
-자체 호스팅 전환은 별도 작업으로 잡아야 한다.
+**베이스맵이 CORS로 막혀 있었다. Worker 중계로 고쳤다.**
+Protomaps 데모 버킷은 `Access-Control-Allow-Origin`을 주지 않아 브라우저가 직접
+읽을 수 없다. 초기 구현은 그 URL을 프론트에서 바로 열려고 해서 "베이스맵 로드 실패"가 났다.
+Worker에 `/api/basemap`을 추가해 Range 요청을 중계하고 CORS 헤더를 붙인다.
+
+로컬에서 끝까지 확인했다. PMTiles 헤더, 메타데이터, 그리고 북서태평양 초기 뷰에
+해당하는 실제 벡터 타일까지 중계 경로로 받아진다.
+
+```
+GET /api/basemap  Range: bytes=0-127
+  → 206, Content-Range: bytes 0-127/137781495687, Access-Control-Allow-Origin: *
+  → 매직바이트 "PMTiles"
+tile z3/7/3 → 16096 bytes
+layers: boundaries, buildings, earth, landcover, landuse, places, pois, roads, water
+```
+
+스타일이 참조하는 소스 레이어 이름(`earth`, `landuse`, `water`, `roads`, `boundaries`,
+`places`)이 실제 파일의 레이어와 일치하는 것도 메타데이터로 확인했다. 추측이었던 부분이다.
+
+🚨 **배포된 Pages 페이지는 아직 베이스맵이 뜨지 않는다.** Pages는 정적 호스팅이라
+중계할 Worker가 없다. 해소하려면 둘 중 하나가 필요하다.
+
+- Worker를 Cloudflare에 배포하고 `VITE_PMTILES_URL`을 그 URL로 지정
+- 북서태평양 영역만 추출한 PMTiles를 `public/`에 두고 같은 출처에서 서빙
+
+운영 트래픽을 공개 데모 버킷에 얹으면 안 된다는 점은 그대로다.
 
 **Node 20에서 최신 wrangler가 돌지 않는다.** wrangler 4.100 이상이 Node 22를 요구한다.
 설치된 런타임이 20.19.6이라 Node 20 지원 마지막 계열인 `~4.86.0`으로 고정했다.
