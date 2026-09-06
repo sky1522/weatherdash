@@ -9,7 +9,9 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div id="map" role="application" aria-label="북서태평양 지도"></div>
+<div id="map" role="application" aria-label="북서태평양 태풍 지도"></div>
+<!-- 지도 위 정보는 반드시 텍스트로도 존재해야 한다. 지도만으로 전달하지 않는다. -->
+<aside id="panel" class="panel" aria-label="태풍 정보" aria-live="polite"></aside>
 <div id="status" class="status" role="status" aria-live="polite">베이스맵 불러오는 중…</div>
 <script type="module" src="/src/main.ts"></script>
 </body>

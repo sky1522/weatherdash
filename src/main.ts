@@ -1,11 +1,12 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './styles.css';
 import { createMap } from './map';
-
-/**
- * P0 진입점. 베이스맵만 띄운다.
- * 태풍 레이어·데이터 조회는 P1 이후 범위이므로 여기서 호출하지 않는다.
- */
+import { currentUtcStamp, fetchTyphoonData, fetchTyphoonList, fetchTyphoonNow } from './api';
+import { addTyphoonLayers, attachPopups, boundsOf, setTyphoonData } from './typhoon/layers';
+import { buildTyphoonSources } from './typhoon/geojson';
+import { renderPanel, type PanelState } from './panel';
+import { latestAnalysis } from '../lib/parse';
+import type { TyphoonListEntry, TyphoonSeries } from '../lib/types';
 
 /**
  * 기본값은 저장소에 함께 두는 북서태평양 추출본이다. 같은 출처에서 서빙되므로
@@ -21,7 +22,12 @@ const PMTILES_URL = new URL(
 ).href;
 
 const container = document.getElementById('map');
+const panel = document.getElementById('panel');
 const status = document.getElementById('status');
+
+if (!container || !panel) {
+  throw new Error('#map 또는 #panel 컨테이너를 찾을 수 없다.');
+}
 
 function setStatus(text: string, state: 'ok' | 'error' = 'ok'): void {
   if (!status) return;
@@ -29,37 +35,87 @@ function setStatus(text: string, state: 'ok' | 'error' = 'ok'): void {
   status.dataset['state'] = state;
 }
 
-if (!container) {
-  throw new Error('#map 컨테이너를 찾을 수 없다.');
-}
-
 const map = createMap(container, PMTILES_URL);
 
-/**
- * 렌더 결과를 화면에 그대로 보고한다.
- * 🚨 타일이 정상으로 와도 스타일 색 대비가 무너지면 "지도가 안 나온다"로 보인다.
- *    데이터가 왔는지와 보이는지를 구분하지 못하면 엉뚱한 곳을 고치게 된다.
- */
-map.on('idle', () => {
-  const counted = ['earth', 'water', 'coastline', 'place-labels']
-    .filter((id) => map.getLayer(id))
-    .map((id) => `${id} ${map.queryRenderedFeatures({ layers: [id] }).length}`)
-    .join(' · ');
-  const c = map.getCenter();
-  setStatus(
-    `P0 — 베이스맵만 표시. 태풍 레이어는 P2에서 추가한다.
-` +
-      `z${map.getZoom().toFixed(1)} ${c.lng.toFixed(1)}E ${c.lat.toFixed(1)}N · ${counted}`,
-  );
+map.on('load', () => {
+  setStatus('베이스맵 준비 완료. 태풍 자료를 부르는 중…');
+  addTyphoonLayers(map);
+  attachPopups(map);
+  void loadTyphoon();
 });
 
 // 🚨 타일 로드 실패를 조용히 넘기지 않는다. 빈 지도와 장애를 구분해서 보여준다.
 map.on('error', (event) => {
   const reason = event.error instanceof Error ? event.error.message : '알 수 없는 오류';
-  // 🚨 타일 로드 실패를 조용히 넘기지 않는다. 빈 지도와 장애를 구분해서 보여준다.
-  //    가장 흔한 원인은 타일 중계 Worker 가 떠 있지 않은 경우다.
-  setStatus(
-    `베이스맵 로드 실패: ${reason} · 타일 출처 ${PMTILES_URL} · pnpm dev:worker 가 떠 있는지 확인`,
-    'error',
-  );
+  setStatus(`베이스맵 로드 실패: ${reason} · 타일 출처 ${PMTILES_URL}`, 'error');
 });
+
+function show(state: PanelState): void {
+  renderPanel(panel!, state);
+}
+
+/**
+ * 조회 흐름.
+ *
+ * 1. 목록으로 진행 중 태풍을 확정한다. 진행 여부는 `NOW=1`.
+ * 2. 기준시각 조회로 최신 발표번호를 알아낸다. `typ_now`는 `seq` 없이 부를 수 있다.
+ * 3. `YY`, `typ`, `seq`를 전부 명시해 상세를 다시 부른다.
+ *
+ * 🚨 3단계를 생략하고 2단계 결과를 그대로 쓰지 않는다. 인자를 생략한 조회는 시점에 따라
+ *    응답이 달라져 재현이 안 되고, `typ_now`는 예측행의 `SEQ`를 0으로 준다.
+ */
+async function loadTyphoon(): Promise<void> {
+  show({ kind: 'loading' });
+
+  const year = new Date().getUTCFullYear();
+
+  const list = await fetchTyphoonList(year);
+  if (list.status === 'error') {
+    setStatus(`태풍 목록 조회 실패: ${list.reason}`, 'error');
+    show({ kind: 'error', reason: list.reason });
+    return;
+  }
+
+  const ongoing: TyphoonListEntry | null =
+    list.status === 'ok' ? (list.data.find((e) => e.now === 1) ?? null) : null;
+
+  const now = await fetchTyphoonNow(currentUtcStamp());
+  if (now.status === 'error') {
+    setStatus(`태풍 상세 조회 실패: ${now.reason}`, 'error');
+    show({ kind: 'error', reason: now.reason });
+    return;
+  }
+  if (now.status === 'none' || now.data.length === 0) {
+    setStatus('진행 중인 태풍이 없다.');
+    show({ kind: 'none', year });
+    return;
+  }
+
+  // 최신 발표번호는 마지막 분석점이 가지고 있다.
+  const provisional = now.data[0]!;
+  const seq = latestAnalysis(provisional)?.seq ?? null;
+
+  let series: TyphoonSeries = provisional;
+  if (seq !== null) {
+    const detail = await fetchTyphoonData(provisional.yy, provisional.typ, seq);
+    if (detail.status === 'error') {
+      setStatus(`태풍 상세 조회 실패: ${detail.reason}`, 'error');
+      show({ kind: 'error', reason: detail.reason });
+      return;
+    }
+    if (detail.status === 'ok' && detail.data.length > 0) series = detail.data[0]!;
+  }
+
+  const sources = buildTyphoonSources(series);
+  setTyphoonData(map, sources);
+  show({ kind: 'ok', entry: ongoing, series });
+
+  const bounds = boundsOf(sources);
+  if (bounds) map.fitBounds(bounds, { padding: 80, maxZoom: 6, duration: 600 });
+
+  const forecastCount = series.forecasts.at(-1)?.points.length ?? 0;
+  setStatus(
+    `분석 ${series.analysis.length}개 · 예측 ${forecastCount}개 · 발표번호 ${seq ?? '-'}\n` +
+      '실선은 분석, 점선은 예보다. 점을 누르면 그 시각의 발표값이 나온다.',
+  );
+}

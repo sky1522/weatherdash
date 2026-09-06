@@ -17,5 +17,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "worker", "tests", "vite.config.ts"]
+  "include": ["lib", "src", "worker", "tests", "vite.config.ts"]
 }
