@@ -1,6 +1,6 @@
 # claude_results — P0 스캐폴딩 및 응답 실측
 
-작성: 2026-09-06 · 커밋 `fef17c5` · 브랜치 `main` (direct-main)
+작성: 2026-09-06 · 커밋 `0e5ab0c` · 브랜치 `main` (direct-main)
 
 ## 상태 요약
 
@@ -10,20 +10,38 @@
 | Worker 프록시 골격 (`/api/typhoon/*`) | ✅ 완료 |
 | `.dev.vars.example` + 시크릿 바인딩 | ✅ 완료 |
 | `pnpm dev` / `pnpm dev:worker` 기동 | ✅ 확인 |
+| 픽스처 바이트 무결성 방어 (`.gitattributes` + 검사 테스트) | ✅ 완료 |
+| 원격 CI + Pages 배포 복구 | ✅ 완료 |
 | 픽스처 수집 → `fixtures/raw/` | ⏸ **대기** — `KMA_AUTH_KEY` 미확보 |
 | 6개 항목 판정 | ⏸ **대기** — 픽스처 없이는 판정 불가 |
 
 **P0 DoD는 아직 미충족이다.** 인증키가 들어오는 즉시 `pnpm fixtures` 한 번으로 나머지가 끝난다.
 
-## 지금 필요한 것
+## 지금 필요한 것 — 인증키 하나
 
-```
-cd C:\dev\weatherdash
-copy .dev.vars.example .dev.vars
+`C:\dev\weatherdash\.dev.vars` 가 세 번 확인했는데도 생성되지 않았다.
+저장소 루트, `C:\dev`, 문서, 바탕화면, 다운로드, 사용자 폴더까지 훑었고
+`.dev.vars.example` 만 나온다. 환경변수와 wrangler 설정에도 키가 없다.
+
+이 PC의 다른 프로젝트(`C:\dev\wavyon`, `C:\dev\expanded-radar`)가 이미 같은
+기상청 API 허브를 쓰고 있다. `C:\dev\wavyon\.env` 에 키가 있을 가능성이 높다.
+다른 프로젝트의 시크릿을 읽는 것은 권한 정책에 막혀 시도하지 않았다. 판단은 사용자 몫이다.
+
+키를 화면에 띄우지 않고 옮기는 방법:
+
+```powershell
+$k = ((Get-Content C:\dev\wavyon\.env | Where-Object { $_ -match 'KMA' }) -split '=',2)[1].Trim()
+Set-Content C:\dev\weatherdash\.dev.vars "KMA_AUTH_KEY=$k" -Encoding utf8
+Test-Path C:\dev\weatherdash\.dev.vars
 ```
 
-`.dev.vars`의 `KMA_AUTH_KEY=` 뒤에 기상청 API 허브 인증키를 넣어주면 된다.
-이 파일은 `.gitignore` 대상이라 커밋되지 않는다.
+직접 입력해도 된다.
+
+```powershell
+Set-Content C:\dev\weatherdash\.dev.vars 'KMA_AUTH_KEY=<키>' -Encoding utf8
+```
+
+`.dev.vars` 는 `.gitignore` 대상이라 커밋되지 않는다.
 
 ## 한 일
 
@@ -138,21 +156,53 @@ Vite 엔트리로 새로 썼다.
 ```
 lint       ✅
 typecheck  ✅
-test:unit  ✅  8 passed
-build      ✅  6.0s
-commit     ✅  fef17c5  (파일 개별 add, git add -A 미사용)
+test:unit  ✅  9 passed / 3 skipped (픽스처 미수집분)
+build      ✅  6.6s  (VITE_BASE=/weatherdash/ 검증 포함)
+commit     ✅  fef17c5, 0e5ab0c  (파일 개별 add, git add -A 미사용)
 push       ✅  origin/main
+remote CI  ✅  success
 ```
 
 `build`에서 청크 1.08 MB 경고가 난다. MapLibre 본체 크기다. 코드 스플리팅은
 요청 범위 밖이라 손대지 않았다.
 
-## 짚어둘 것
+## 추가로 해결한 문제
 
-**GitHub Pages가 지금 깨져 있다.** 이전 세션에서 Pages를 `main` 브랜치 루트로 켜 두었는데,
-루트 `index.html`을 Vite 엔트리로 교체하면서 그 페이지가 `/src/main.ts`를 불러오려 한다.
-저장소에 빌드 산출물이 없으므로 404가 난다. 배포는 P5 범위라 임의로 손대지 않았다.
-빌드 산출물을 올리는 워크플로로 바꿀지, Pages를 끌지 지시를 기다린다.
+### 픽스처 바이트가 조용히 깨질 뻔했다
+
+이 저장소는 `core.autocrlf=true` 인데 `.gitattributes` 가 없었다. 이 상태로
+`fixtures/raw/*.txt` 를 커밋하면 git이 텍스트로 판단해 커밋 시 CRLF→LF,
+체크아웃 시 LF→CRLF 로 바꾼다. 원문 바이트를 그대로 남기라는 P0 요구가
+파일을 쓰는 순간이 아니라 **커밋하는 순간** 깨진다.
+
+인코딩 판정과 결측 표기 판정이 전부 이 바이트 위에서 이뤄지므로, 눈치채지 못한 채
+잘못된 판정을 내리고 그 위에 P1 파서를 올리게 된다. 전형적인 조용한 실패다.
+
+`.gitattributes` 로 `fixtures/raw/** -text -diff` 를 걸어 변환을 금지했고,
+`git check-attr` 로 `text: unset` 을 확인했다. 여기에 더해
+`tests/fixtures.test.ts` 가 매니페스트의 sha256·바이트 수와 실제 파일을 대조한다.
+수집 전에는 skip 하고, 수집 후에 활성화된다.
+
+### GitHub Pages 복구
+
+루트 `index.html` 을 Vite 엔트리로 교체하면서 기존 Pages 배포가 깨졌다.
+Pages 가 저장소 루트를 그대로 서빙하는 설정이었는데, 새 엔트리는 저장소에 없는
+`/src/main.ts` 를 부른다.
+
+`.github/workflows/ci.yml` 을 추가해 빌드 산출물을 배포하도록 바꿨다.
+같은 워크플로가 `lint → typecheck → test:unit → build` 게이트를 원격에서 돌린다.
+CLAUDE.md 게이트의 마지막 항목인 "remote CI" 가 이걸로 채워진다.
+Pages 하위 경로(`/weatherdash/`)용 에셋 경로는 `VITE_BASE` 로 주입한다.
+
+확인 결과:
+
+```
+Actions run   completed / success
+https://sky1522.github.io/weatherdash/                    HTTP 200
+https://sky1522.github.io/weatherdash/assets/index-*.js   HTTP 200
+```
+
+## 짚어둘 것
 
 **Node 20에서 최신 wrangler가 돌지 않는다.** wrangler 4.100 이상이 Node 22를 요구한다.
 설치된 런타임이 20.19.6이라 Node 20 지원 마지막 계열인 `~4.86.0`으로 고정했다.
@@ -163,7 +213,9 @@ Node 22로 올리면 핀을 풀 수 있다.
 
 ## 다음
 
-1. `.dev.vars`에 `KMA_AUTH_KEY` 입력
+키가 들어오면 아래는 한 번에 끝난다. 다른 대기 항목은 없다.
+
+1. `.dev.vars` 에 `KMA_AUTH_KEY` 입력
 2. `pnpm fixtures` — 20건 수집
 3. 픽스처 바이트로 6개 항목 판정, `PROGRESS.md` 갱신 (해소된 것만 ✅)
-4. 픽스처 스냅샷 테스트 추가 후 게이트 재통과, 커밋, 푸시
+4. 게이트 재통과, 커밋, 푸시
